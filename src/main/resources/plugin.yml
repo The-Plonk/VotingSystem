@@ -2,3 +2,10 @@ name: VotingSystem
 author: Intriguing
 version: 1.0-SNAPSHOT
 main: net.theplonk.votingsystem.VotingSystem
+commands:
+  vote:
+    description: Voting command to vote.
+    usage: /vote help
+  question:
+    description: Question command for administrators.
+    usage: /question help
