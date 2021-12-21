@@ -2,55 +2,67 @@ package net.theplonk.votingsystem;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import lombok.Getter;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.theplonk.votingsystem.commands.BaseCommand;
-import net.theplonk.votingsystem.commands.vote.HelpCommand;
+import net.theplonk.votingsystem.commands.VoteCommand;
+import net.theplonk.votingsystem.util.JsonConfig;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 public class VotingSystem extends JavaPlugin {
 
-    private File configFile;
+    @Getter public static VotingSystem instance;
+    @Getter private JsonConfig config;
+    private BukkitAudiences adventure;
     private final Map<String, Object> configMap = new HashMap<>();
     public final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     @Override
     public void onEnable() {
+        instance = this;
         this.registerCommands();
-        this.initiateConfigurations();
-
+        this.config = new JsonConfig(this, "config.json");
+        // Create the BukkitAudience (adventure-api)
+        this.adventure = BukkitAudiences.create(this);
+        // Load Configurations using JsonConfig utility
+        config.reload();
     }
 
     @Override
     public void onDisable() {
-
-    }
-
-    public void registerCommands() {
-        BaseCommand voteCommand = new BaseCommand();
-        BaseCommand questionCommand = new BaseCommand();
-        // Register /vote and /question command
-        Objects.requireNonNull(this.getCommand("vote")).setExecutor(voteCommand);
-        Objects.requireNonNull(this.getCommand("question")).setExecutor(questionCommand);
-        // Register /vote sub-commands
-//        voteCommand.registerSubCommand();
-        // Register /question sub-commands
-//        questionCommand.registerSubCommand();
-        voteCommand.registerSubCommand(new HelpCommand());
-        // Register /question sub-commands
-//        questionCommand.registerSubCommand();
-    }
-
-    public void initiateConfigurations() {
-        this.configFile = new File(getDataFolder(), "config.json");
-        if (!configFile.exists()) {
-            saveResource(configFile.getName(), false);
+        config.save();
+        // Close the BukkitAudience
+        if(this.adventure != null) {
+            this.adventure.close();
+            this.adventure = null;
         }
     }
 
+    // Register commands
+    public void registerCommands() {
+        BaseCommand questionCommand = new BaseCommand();
+        // Register /vote and /question command
+        Objects.requireNonNull(this.getCommand("vote")).setExecutor(new VoteCommand());
+        Objects.requireNonNull(this.getCommand("question")).setExecutor(questionCommand);
+
+    }
+
+    // Get the adventure API
+    public @NonNull BukkitAudiences getAdventure() {
+        if(this.adventure == null) {
+            throw new IllegalStateException("Tried to access Adventure when the plugin was disabled!");
+        }
+        return this.adventure;
+    }
+
+    public void setConfigValues() {
+
+    }
 
 
 

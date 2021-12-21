@@ -1,9 +1,10 @@
-package net.theplonk.votingsystem.handlers;
+package net.theplonk.votingsystem.gson;
 
-import com.google.gson.annotations.SerializedName;
+import java.util.UUID;
 
-public class GsonData {
+public class Vote {
 
-
+    private UUID playerUUID;
+    private String vote;
 
 }
