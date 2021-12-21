@@ -1,0 +1,4 @@
+name: VotingSystem
+author: Intriguing
+version: 1.0-SNAPSHOT
+main: net.theplonk.votingsystem.VotingSystem
