@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 net\theplonk\votingsystem\commands\questions\ActiveCommand.class
 net\theplonk\votingsystem\commands\questions\UnpublishCommand.class
 net\theplonk\votingsystem\commands\AbstractSubCommand.class
@@ -8,3 +9,19 @@ net\theplonk\votingsystem\commands\vote\YesCommand.class
 net\theplonk\votingsystem\commands\questions\PublishCommand.class
 net\theplonk\votingsystem\commands\vote\HelpCommand.class
 net\theplonk\votingsystem\commands\vote\NoCommand.class
+=======
+net/theplonk/votingsystem/commands/BaseCommand.class
+net/theplonk/votingsystem/commands/vote/YesCommand.class
+net/theplonk/votingsystem/commands/questions/PublishCommand.class
+net/theplonk/votingsystem/commands/questions/RemoveCommand.class
+net/theplonk/votingsystem/commands/vote/NoCommand.class
+net/theplonk/votingsystem/commands/vote/HelpCommand.class
+net/theplonk/votingsystem/commands/questions/ActiveCommand.class
+net/theplonk/votingsystem/commands/questions/UnpublishCommand.class
+net/theplonk/votingsystem/commands/AbstractSubCommand.class
+net/theplonk/votingsystem/VotingSystem.class
+net/theplonk/votingsystem/commands/questions/EditCommand.class
+net/theplonk/votingsystem/commands/questions/ListCommand.class
+net/theplonk/votingsystem/commands/questions/CreateCommand.class
+net/theplonk/votingsystem/commands/questions/HelpCommand.class
+>>>>>>> 8b30ac29251b0bbb597e4c6f72926ca9c3d9bc26

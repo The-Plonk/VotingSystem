@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 C:\Users\kkant\IdeaProjects\VotingSystem\src\main\java\net\theplonk\votingsystem\commands\questions\UnpublishCommand.java
 C:\Users\kkant\IdeaProjects\VotingSystem\src\main\java\net\theplonk\votingsystem\commands\vote\NoCommand.java
 C:\Users\kkant\IdeaProjects\VotingSystem\src\main\java\net\theplonk\votingsystem\VotingSystem.java
@@ -8,3 +9,19 @@ C:\Users\kkant\IdeaProjects\VotingSystem\src\main\java\net\theplonk\votingsystem
 C:\Users\kkant\IdeaProjects\VotingSystem\src\main\java\net\theplonk\votingsystem\commands\vote\YesCommand.java
 C:\Users\kkant\IdeaProjects\VotingSystem\src\main\java\net\theplonk\votingsystem\commands\questions\ActiveCommand.java
 C:\Users\kkant\IdeaProjects\VotingSystem\src\main\java\net\theplonk\votingsystem\commands\BaseCommand.java
+=======
+/home/intriguing/IdeaProjects/VotingSystem/src/main/java/net/theplonk/votingsystem/commands/questions/UnpublishCommand.java
+/home/intriguing/IdeaProjects/VotingSystem/src/main/java/net/theplonk/votingsystem/commands/questions/RemoveCommand.java
+/home/intriguing/IdeaProjects/VotingSystem/src/main/java/net/theplonk/votingsystem/commands/questions/PublishCommand.java
+/home/intriguing/IdeaProjects/VotingSystem/src/main/java/net/theplonk/votingsystem/commands/vote/YesCommand.java
+/home/intriguing/IdeaProjects/VotingSystem/src/main/java/net/theplonk/votingsystem/commands/questions/ListCommand.java
+/home/intriguing/IdeaProjects/VotingSystem/src/main/java/net/theplonk/votingsystem/commands/vote/HelpCommand.java
+/home/intriguing/IdeaProjects/VotingSystem/src/main/java/net/theplonk/votingsystem/commands/AbstractSubCommand.java
+/home/intriguing/IdeaProjects/VotingSystem/src/main/java/net/theplonk/votingsystem/commands/questions/EditCommand.java
+/home/intriguing/IdeaProjects/VotingSystem/src/main/java/net/theplonk/votingsystem/commands/questions/CreateCommand.java
+/home/intriguing/IdeaProjects/VotingSystem/src/main/java/net/theplonk/votingsystem/commands/questions/ActiveCommand.java
+/home/intriguing/IdeaProjects/VotingSystem/src/main/java/net/theplonk/votingsystem/VotingSystem.java
+/home/intriguing/IdeaProjects/VotingSystem/src/main/java/net/theplonk/votingsystem/commands/BaseCommand.java
+/home/intriguing/IdeaProjects/VotingSystem/src/main/java/net/theplonk/votingsystem/commands/vote/NoCommand.java
+/home/intriguing/IdeaProjects/VotingSystem/src/main/java/net/theplonk/votingsystem/commands/questions/HelpCommand.java
+>>>>>>> 8b30ac29251b0bbb597e4c6f72926ca9c3d9bc26

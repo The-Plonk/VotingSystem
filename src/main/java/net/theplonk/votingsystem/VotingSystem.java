@@ -3,10 +3,10 @@ package net.theplonk.votingsystem;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.theplonk.votingsystem.commands.BaseCommand;
+import net.theplonk.votingsystem.commands.vote.HelpCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -20,6 +20,8 @@ public class VotingSystem extends JavaPlugin {
     @Override
     public void onEnable() {
         this.registerCommands();
+        this.initiateConfigurations();
+
     }
 
     @Override
@@ -34,9 +36,22 @@ public class VotingSystem extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("vote")).setExecutor(voteCommand);
         Objects.requireNonNull(this.getCommand("question")).setExecutor(questionCommand);
         // Register /vote sub-commands
+<<<<<<< HEAD
 //        voteCommand.registerSubCommand();
         // Register /question sub-commands
 //        questionCommand.registerSubCommand();
+=======
+        voteCommand.registerSubCommand(new HelpCommand());
+        // Register /question sub-commands
+//        questionCommand.registerSubCommand();
+    }
+
+    public void initiateConfigurations() {
+        this.configFile = new File(getDataFolder(), "config.json");
+        if (!configFile.exists()) {
+            saveResource(configFile.getName(), false);
+        }
+>>>>>>> 8b30ac29251b0bbb597e4c6f72926ca9c3d9bc26
     }
 
 

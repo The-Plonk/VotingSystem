@@ -1,6 +1,7 @@
 name: VotingSystem
 author: Intriguing
 version: 1.0-SNAPSHOT
+api-version: 1.18
 main: net.theplonk.votingsystem.VotingSystem
 commands:
   vote:
