@@ -17,7 +17,6 @@ public class VotingSystem extends JavaPlugin {
     private final Map<String, Object> configMap = new HashMap<>();
     public final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-
     @Override
     public void onEnable() {
         this.registerCommands();
@@ -35,9 +34,9 @@ public class VotingSystem extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("vote")).setExecutor(voteCommand);
         Objects.requireNonNull(this.getCommand("question")).setExecutor(questionCommand);
         // Register /vote sub-commands
-        voteCommand.registerSubCommand();
+//        voteCommand.registerSubCommand();
         // Register /question sub-commands
-        questionCommand.registerSubCommand();
+//        questionCommand.registerSubCommand();
     }
 
 

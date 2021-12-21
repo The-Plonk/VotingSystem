@@ -10,7 +10,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="VotingSystem" target="7" />
+      <module name="VotingSystem" target="17" />
     </bytecodeTargetLevel>
   </component>
 </project>
