@@ -21,9 +21,6 @@ public class VotingSystem extends JavaPlugin {
     @Override
     public void onEnable() {
         this.registerCommands();
-        this.configFile = new File(getDataFolder(), "config.json");
-        if (!configFile.exists()) saveResource(configFile.getName(), false);
-        this.configMap = gson.fromJson(new FileReader(configFile), new HashMap<String, Object>().getClass());
     }
 
     @Override
