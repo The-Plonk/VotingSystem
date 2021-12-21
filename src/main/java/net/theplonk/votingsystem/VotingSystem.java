@@ -36,11 +36,9 @@ public class VotingSystem extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("vote")).setExecutor(voteCommand);
         Objects.requireNonNull(this.getCommand("question")).setExecutor(questionCommand);
         // Register /vote sub-commands
-<<<<<<< HEAD
 //        voteCommand.registerSubCommand();
         // Register /question sub-commands
 //        questionCommand.registerSubCommand();
-=======
         voteCommand.registerSubCommand(new HelpCommand());
         // Register /question sub-commands
 //        questionCommand.registerSubCommand();
@@ -51,7 +49,6 @@ public class VotingSystem extends JavaPlugin {
         if (!configFile.exists()) {
             saveResource(configFile.getName(), false);
         }
->>>>>>> 8b30ac29251b0bbb597e4c6f72926ca9c3d9bc26
     }
 
 
