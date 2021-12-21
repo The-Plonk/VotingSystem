@@ -1,0 +1,11 @@
+{
+  "messages": {
+    "vote help menu": [
+      "<yellow>Vote Help Menu",
+      "",
+      "%currentstatus%",
+      "",
+      ""
+    ]
+  }
+}

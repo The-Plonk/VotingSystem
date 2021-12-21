@@ -19,13 +19,11 @@ public class BaseCommand implements CommandExecutor, TabExecutor {
             String trySubCommand = args[0];
             // Run specified sub command and return true
             if (subCommands.containsKey(trySubCommand.toLowerCase())) {
-                subCommands.get(trySubCommand.toLowerCase()).onCommand(sender, Arrays.copyOfRange(args, 1, args.length));
-                return true;
+                return subCommands.get(trySubCommand.toLowerCase()).onCommand(sender, Arrays.copyOfRange(args, 1, args.length));
             }
         }
         // If failed, then return help menu with no args
-        subCommands.get("help").onCommand(sender, null);
-        return true;
+        return subCommands.get("help").onCommand(sender, null);
     }
 
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
