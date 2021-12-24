@@ -1,26 +1,23 @@
 package net.theplonk.votingsystem;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import lombok.Getter;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.theplonk.votingsystem.commands.BaseCommand;
 import net.theplonk.votingsystem.commands.VoteCommand;
-import net.theplonk.votingsystem.managers.SettingsManager;
+import net.theplonk.votingsystem.commands.questions.PublishCommand;
+import net.theplonk.votingsystem.objects.VotingSystemConfig;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import redempt.redlib.config.ConfigManager;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 public class VotingSystem extends JavaPlugin {
 
     @Getter public static VotingSystem instance;
-    @Getter private SettingsManager config;
     private BukkitAudiences adventure;
-    private final Map<String, Object> configMap = new HashMap<>();
-    public final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    @Getter private final VotingSystemConfig votingConfig = new VotingSystemConfig();
+    private ConfigManager configManager;
 
     @Override
     public void onEnable() {
@@ -28,8 +25,8 @@ public class VotingSystem extends JavaPlugin {
         this.registerCommands();
         // Create the BukkitAudience (adventure-api)
         this.adventure = BukkitAudiences.create(this);
-        // Load Configurations using SettingsManager
-        config.init();
+        this.loadConfigurations();
+
     }
 
     @Override
@@ -39,6 +36,8 @@ public class VotingSystem extends JavaPlugin {
             this.adventure.close();
             this.adventure = null;
         }
+
+        configManager.save();
     }
 
     // Register commands
@@ -47,6 +46,7 @@ public class VotingSystem extends JavaPlugin {
         // Register /vote and /question command
         Objects.requireNonNull(this.getCommand("vote")).setExecutor(new VoteCommand());
         Objects.requireNonNull(this.getCommand("question")).setExecutor(questionCommand);
+        questionCommand.registerSubCommand(new PublishCommand());
 
     }
 
@@ -58,8 +58,11 @@ public class VotingSystem extends JavaPlugin {
         return this.adventure;
     }
 
-    public void setConfigValues() {
-
+    public void loadConfigurations() {
+        getLogger().info("Loading configurations...");
+        configManager = ConfigManager.create(this)
+                .target(votingConfig).saveDefaults().load();
+        getLogger().info("Loaded configurations!");
     }
 
 

@@ -23,7 +23,7 @@
               <goal>shade</goal>
             </goals>
             <configuration>
-              <outputDirectory>testing/plugins</outputDirectory>
+              <outputFile>testing/plugins/${project.artifactId}.jar</outputFile>
               <finalName>VotingSystem</finalName>
               <relocations>
                 <relocation>
@@ -38,6 +38,10 @@
     </plugins>
   </build>
   <repositories>
+    <repository>
+      <id>redempt.dev</id>
+      <url>https://redempt.dev</url>
+    </repository>
     <repository>
       <id>papermc</id>
       <url>https://papermc.io/repo/repository/maven-public/</url>
@@ -68,6 +72,12 @@
       <groupId>com.gitlab.ruany</groupId>
       <artifactId>LiteBansAPI</artifactId>
       <version>0.3.5</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.22</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>

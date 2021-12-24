@@ -28,7 +28,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>testing/plugins</outputDirectory>
+                            <outputFile>testing/plugins/${project.artifactId}.jar</outputFile>
                             <finalName>VotingSystem</finalName>
                             <relocations>
                                 <relocation>
@@ -77,9 +77,23 @@
             <artifactId>adventure-platform-bukkit</artifactId>
             <version>4.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.Redempt</groupId>
+            <artifactId>RedLib</artifactId>
+            <version>6.3.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.stefvanschie.inventoryframework</groupId>
+            <artifactId>IF</artifactId>
+            <version>0.10.3</version>
+        </dependency>
     </dependencies>
 
     <repositories>
+        <repository>
+            <id>redempt.dev</id>
+            <url>https://redempt.dev</url>
+        </repository>
         <repository>
             <id>papermc</id>
             <url>https://papermc.io/repo/repository/maven-public/</url>

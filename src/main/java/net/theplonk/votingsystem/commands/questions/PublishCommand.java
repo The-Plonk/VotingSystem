@@ -1,15 +1,14 @@
 package net.theplonk.votingsystem.commands.questions;
 
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.theplonk.votingsystem.VotingSystem;
 import net.theplonk.votingsystem.commands.AbstractSubCommand;
-import net.theplonk.votingsystem.managers.SettingsManager;
 import net.theplonk.votingsystem.managers.VoteManager;
+import net.theplonk.votingsystem.objects.Question;
+import net.theplonk.votingsystem.objects.VotingSystemConfig;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Map;
 
 public class PublishCommand extends AbstractSubCommand {
@@ -22,17 +21,23 @@ public class PublishCommand extends AbstractSubCommand {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         VotingSystem plugin = VotingSystem.getInstance();
-        SettingsManager config = plugin.getConfig();
+        VotingSystemConfig config = plugin.getVotingConfig();
         Audience audience = plugin.getAdventure().sender(sender);
 
-        List<Map<?, ?>> questions = config.questions;
-        plugin.getLogger().info(questions.toString());
+        Map<String, Question> questions = config.getQuestions();
 
-        if (VoteManager.voteRunning) {
-            audience.sendMessage(MiniMessage.get().parse("<red>Vote already running!"));
+        if (VoteManager.isVoteRunning()) {
+            audience.sendMessage(config.getMessageComponentPlain("vote-running"));
             return true;
         }
 
+        if (args.length > 0) {
+            if (questions.containsKey(args[0])) {
+                Question question = questions.get(args[0]);
+                VoteManager.setQuestion(question.title(), question.description());
+                VoteManager.setVoteRunning(true);
+            }
+        }
         return true;
     }
 }

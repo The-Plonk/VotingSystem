@@ -2,6 +2,8 @@ name: VotingSystem
 author: Intriguing
 version: 1.0-SNAPSHOT
 api-version: 1.18
+depend:
+  - RedLib
 main: net.theplonk.votingsystem.VotingSystem
 commands:
   vote:
