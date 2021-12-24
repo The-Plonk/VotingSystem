@@ -33,8 +33,7 @@ public class PublishCommand extends AbstractSubCommand {
 
         if (args.length > 0) {
             if (questions.containsKey(args[0])) {
-                Question question = questions.get(args[0]);
-                VoteManager.setQuestion(question.title(), question.description());
+                VoteManager.setQuestion(questions.get(args[0]));
                 VoteManager.setVoteRunning(true);
             }
         }

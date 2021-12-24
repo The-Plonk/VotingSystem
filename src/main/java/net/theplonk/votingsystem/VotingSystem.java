@@ -9,15 +9,21 @@ import net.theplonk.votingsystem.objects.VotingSystemConfig;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import redempt.redlib.config.ConfigManager;
+import redempt.redlib.sql.SQLCache;
+import redempt.redlib.sql.SQLHelper;
 
+import java.sql.Connection;
 import java.util.Objects;
 
 public class VotingSystem extends JavaPlugin {
 
-    @Getter public static VotingSystem instance;
-    private BukkitAudiences adventure;
+    @Getter private static VotingSystem instance;
     @Getter private final VotingSystemConfig votingConfig = new VotingSystemConfig();
+    @Getter private SQLHelper sqlDatabase;
+    @Getter private SQLCache sqlSettingsCache;
+    @Getter private SQLCache sqlDataCache;
     private ConfigManager configManager;
+    private BukkitAudiences adventure;
 
     @Override
     public void onEnable() {
@@ -26,7 +32,9 @@ public class VotingSystem extends JavaPlugin {
         // Create the BukkitAudience (adventure-api)
         this.adventure = BukkitAudiences.create(this);
         this.loadConfigurations();
-
+        Connection connection = SQLHelper.openSQLite(this.getDataFolder().toPath().resolve("database.db"));
+        this.sqlDatabase = new SQLHelper(connection);
+        this.initializeDatabase();
     }
 
     @Override
@@ -37,7 +45,9 @@ public class VotingSystem extends JavaPlugin {
             this.adventure = null;
         }
 
-        configManager.save();
+        this.configManager.save();
+        this.sqlDataCache.flush();
+        this.sqlDatabase.commit();
     }
 
     // Register commands
@@ -63,6 +73,15 @@ public class VotingSystem extends JavaPlugin {
         configManager = ConfigManager.create(this)
                 .target(votingConfig).saveDefaults().load();
         getLogger().info("Loaded configurations!");
+    }
+
+    public void initializeDatabase() {
+        sqlDatabase.execute("CREATE TABLE IF NOT EXISTS votes ( uuid VARCHAR(36) PRIMARY KEY, vote BOOLEAN NOT NULL );");
+        sqlDatabase.execute("CREATE TABLE IF NOT EXISTS vote_data ( setting VARCHAR(50) PRIMARY KEY, value VARCHAR(255) PRIMARY KEY );");
+        sqlSettingsCache = sqlDatabase.createCache("vote_data", "value", "setting");
+        sqlDataCache = sqlDatabase.createCache("votes", "vote", "uuid");
+        sqlDatabase.setCommitInterval(1200);
+        sqlDatabase.close();
     }
 
 
