@@ -21,6 +21,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -206,12 +207,12 @@ public final class YamlConfig extends YamlConfiguration {
 
     /**
      * Sync a specific configuration section with another one, recursively.
-     * @param commentedConfig The config that contains the data we need to sync with.
+     * @param commentedYamlConfig The config that contains the data we need to sync with.
      * @param section The current section that we sync.
      * @param ignoredSections A list of ignored sections that won't be synced (unless not found in the file).
      * @return Returns true if there were any changes, otherwise false.
      */
-    private boolean syncConfigurationSection(Config commentedConfig, ConfigurationSection section, List<String> ignoredSections){
+    private boolean syncConfigurationSection(YamlConfig commentedYamlConfig, ConfigurationSection section, List<String> ignoredSections){
         //Variables that are used to track progress.
         boolean changed = false;
 
@@ -229,7 +230,7 @@ public final class YamlConfig extends YamlConfiguration {
                 //If the config doesn't contain the section, or it's not ignored - we will sync data.
                 if(!containsSection || !isIgnored) {
                     //Syncing data and updating the changed variable.
-                    changed = syncConfigurationSection(commentedConfig, section.getConfigurationSection(key), ignoredSections) || changed;
+                    changed = syncConfigurationSection(commentedYamlConfig, section.getConfigurationSection(key), ignoredSections) || changed;
                 }
             }
 
@@ -242,9 +243,9 @@ public final class YamlConfig extends YamlConfiguration {
             }
 
             //Checking if there is a valid comment for the path, and also making sure the comments are not the same.
-            if (commentedConfig.containsComment(path) && !commentedConfig.getComment(path).equals(getComment(path))) {
+            if (commentedYamlConfig.containsComment(path) && !commentedYamlConfig.getComment(path).equals(getComment(path))) {
                 //Saving the comment of the key into the config.
-                setComment(path, commentedConfig.getComment(path));
+                setComment(path, commentedYamlConfig.getComment(path));
                 //Updating variable.
                 changed = true;
             }
@@ -265,7 +266,7 @@ public final class YamlConfig extends YamlConfiguration {
     /**
      * Flag this config as failed to load.
      */
-    private Config flagAsFailed(){
+    private YamlConfig flagAsFailed(){
         creationFailure = true;
         return this;
     }
@@ -275,13 +276,13 @@ public final class YamlConfig extends YamlConfiguration {
      * @param file The file to load the config from.
      * @return A new instance of Config contains all the data (keys, values and comments).
      */
-    public static Config loadConfiguration(File file) {
+    public static YamlConfig loadConfiguration(File file) {
         try {
             FileInputStream stream = new FileInputStream(file);
             return loadConfiguration(new InputStreamReader(stream, StandardCharsets.UTF_8));
         }catch(FileNotFoundException ex){
             Bukkit.getLogger().warning("File " + file.getName() + " doesn't exist.");
-            return new Config().flagAsFailed();
+            return new YamlConfig().flagAsFailed();
         }
     }
 
@@ -290,7 +291,7 @@ public final class YamlConfig extends YamlConfiguration {
      * @param inputStream The input-stream to load the config from.
      * @return A new instance of Config contains all the data (keys, values and comments).
      */
-    public static Config loadConfiguration(InputStream inputStream) {
+    public static YamlConfig loadConfiguration(InputStream inputStream) {
         return loadConfiguration(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
     }
 
@@ -299,9 +300,9 @@ public final class YamlConfig extends YamlConfiguration {
      * @param reader The reader to load the config from.
      * @return A new instance of Config contains all the data (keys, values and comments).
      */
-    public static Config loadConfiguration(Reader reader) {
+    public static @NotNull YamlConfig loadConfiguration(Reader reader) {
         //Creating a blank instance of the config.
-        Config config = new Config();
+        YamlConfig yamlConfig = new YamlConfig();
 
         //Parsing the reader into a BufferedReader for an easy reading of it.
         try(BufferedReader bufferedReader = reader instanceof BufferedReader ? (BufferedReader)reader : new BufferedReader(reader)){
@@ -312,13 +313,13 @@ public final class YamlConfig extends YamlConfiguration {
                 contents.append(line).append('\n');
             }
 
-            config.loadFromString(contents.toString());
+            yamlConfig.loadFromString(contents.toString());
         } catch (IOException | InvalidConfigurationException ex) {
-            config.flagAsFailed();
+            yamlConfig.flagAsFailed();
             ex.printStackTrace();
         }
 
-        return config;
+        return yamlConfig;
     }
 
     /**
@@ -334,12 +335,12 @@ public final class YamlConfig extends YamlConfiguration {
 
     /**
      * Creates a full path of a line.
-     * @param commentedConfig The config to get the path from.
+     * @param commentedYamlConfig The config to get the path from.
      * @param line The line to get the path of.
      * @param currentSection The last known section.
      * @return The full path of the line.
      */
-    private static String getSectionPath(Config commentedConfig, String line, String currentSection){
+    private static String getSectionPath(YamlConfig commentedYamlConfig, String line, String currentSection){
         //Removing all spaces and getting the name of the section.
         String newSection = line.trim().split(": ")[0];
 
@@ -352,7 +353,7 @@ public final class YamlConfig extends YamlConfiguration {
             newSection = newSection.substring(1, newSection.length() - 1);
 
         //Checking if the new section is a child-section of the currentSection.
-        if(!currentSection.isEmpty() && commentedConfig.contains(currentSection + "." + newSection)){
+        if(!currentSection.isEmpty() && commentedYamlConfig.contains(currentSection + "." + newSection)){
             newSection = currentSection + "." + newSection;
         }
 
@@ -364,7 +365,7 @@ public final class YamlConfig extends YamlConfiguration {
             1) The parent is empty - which means we have no where to go, as that's the root section.
             2) The config contains a valid path that was built with <parent-section>.<new-section>.*/
             while(!parentSection.isEmpty() &&
-                    !commentedConfig.contains((parentSection = getParentPath(parentSection)) + "." + newSection));
+                    !commentedYamlConfig.contains((parentSection = getParentPath(parentSection)) + "." + newSection));
 
             //Parsing and building the new full path.
             newSection = parentSection.trim().isEmpty() ? newSection : parentSection + "." + newSection;

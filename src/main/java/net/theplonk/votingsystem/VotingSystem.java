@@ -6,7 +6,7 @@ import lombok.Getter;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.theplonk.votingsystem.commands.BaseCommand;
 import net.theplonk.votingsystem.commands.VoteCommand;
-import net.theplonk.votingsystem.util.JsonConfig;
+import net.theplonk.votingsystem.managers.SettingsManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -17,7 +17,7 @@ import java.util.Objects;
 public class VotingSystem extends JavaPlugin {
 
     @Getter public static VotingSystem instance;
-    @Getter private JsonConfig config;
+    @Getter private SettingsManager config;
     private BukkitAudiences adventure;
     private final Map<String, Object> configMap = new HashMap<>();
     public final Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -26,16 +26,14 @@ public class VotingSystem extends JavaPlugin {
     public void onEnable() {
         instance = this;
         this.registerCommands();
-        this.config = new JsonConfig(this, "config.json");
         // Create the BukkitAudience (adventure-api)
         this.adventure = BukkitAudiences.create(this);
-        // Load Configurations using JsonConfig utility
-        config.reload();
+        // Load Configurations using SettingsManager
+        config.init();
     }
 
     @Override
     public void onDisable() {
-        config.save();
         // Close the BukkitAudience
         if(this.adventure != null) {
             this.adventure.close();

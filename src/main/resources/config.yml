@@ -1,11 +1,4 @@
-{
-  "messages": {
-    "vote help menu": [
-      "<yellow>Vote Help Menu",
-      "",
-      "%currentstatus%",
-      "",
-      ""
-    ]
-  }
-}
+questions:
+  mcMMO:
+    title: Should there be mcMMO?
+    description: mcMMO is a very cool feature!

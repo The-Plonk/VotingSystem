@@ -1,4 +1,4 @@
-package net.theplonk.votingsystem.gson;
+package net.theplonk.votingsystem.objects;
 
 import java.util.UUID;
 
