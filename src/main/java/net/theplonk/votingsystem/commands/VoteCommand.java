@@ -2,6 +2,7 @@ package net.theplonk.votingsystem.commands;
 
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
+import com.github.stefvanschie.inventoryframework.gui.type.util.Gui;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import litebans.api.Database;
 import net.kyori.adventure.audience.Audience;
@@ -10,15 +11,21 @@ import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.theplonk.votingsystem.VotingSystem;
+import net.theplonk.votingsystem.managers.VoteManager;
 import net.theplonk.votingsystem.objects.VotingSystemConfig;
+import net.theplonk.votingsystem.util.DiscordWebhook;
 import org.bukkit.Material;
+import org.bukkit.Statistic;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+import redempt.redlib.sql.SQLCache;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -26,14 +33,22 @@ import java.util.UUID;
 
 public class VoteCommand implements CommandExecutor {
 
+    VotingSystem plugin = VotingSystem.getInstance();
+    SQLCache cacheData = plugin.getSqlDataCache();
+
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
-        VotingSystem plugin = VotingSystem.getInstance();
         BukkitAudiences adventure = plugin.getAdventure();
         VotingSystemConfig config = plugin.getVotingConfig();
 
         if (sender instanceof Player player) {
             Audience playerAudience = adventure.player(player);
+
+            if (!VoteManager.isVoteRunning()) {
+                playerAudience.sendMessage(config.getMessageComponentPlain("vote not running"));
+                return true;
+            }
+
             Sound openMenuSound = Sound.sound(Key.key("block.note_block.pling"), Sound.Source.BLOCK, 1f, 1.5f);
             playerAudience.playSound(openMenuSound, Sound.Emitter.self());
 
@@ -45,15 +60,27 @@ public class VoteCommand implements CommandExecutor {
             ItemMeta signInfoMeta = signInfo.getItemMeta();
             signInfoMeta.displayName(MiniMessage.get().parse("<reset><red><bold>Test"));
             signInfo.setItemMeta(signInfoMeta);
-            staticPane.addItem(new GuiItem(signInfo, event -> {
-
-            }), 4, 3);
+            staticPane.addItem(new GuiItem(signInfo), 4, 3);
 
             ItemStack yesVote = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
             ItemMeta yesVoteMeta = yesVote.getItemMeta();
             yesVoteMeta.displayName(MiniMessage.get().parse("<green>YES!"));
             yesVote.setItemMeta(yesVoteMeta);
-            staticPane.addItem(new GuiItem(yesVote), 2, 1);
+            staticPane.addItem(new GuiItem(yesVote, event -> {
+                if (event.getWhoClicked() instanceof Player playerClicked) {
+                    if (cacheData.select(playerClicked.getUniqueId().toString()) != null) {
+                        this.updateYes(yesVote, yesVoteMeta, playerClicked, gui, true);
+                    } else {
+                        if (!duplicateIPAddress(playerClicked) && playedMoreThanTwoHours(playerClicked)) {
+                            this.updateYes(yesVote, yesVoteMeta, playerClicked, gui, false);
+                        }
+                    }
+                }
+
+
+            }), 2, 1);
+
+
 
             ItemStack noVote = new ItemStack(Material.RED_STAINED_GLASS_PANE);
             ItemMeta noVoteMeta = noVote.getItemMeta();
@@ -74,5 +101,29 @@ public class VoteCommand implements CommandExecutor {
         String IP = Objects.requireNonNull(player.getAddress()).getAddress().getHostAddress();
         Collection<UUID> playersWithIP = Database.get().getUsersByIP(IP);
         return playersWithIP.size() > 1;
+    }
+
+    public boolean playedMoreThanTwoHours(Player player) {
+        return player.getStatistic(Statistic.PLAY_ONE_MINUTE) >= 144000;
+    }
+
+    public void updateYes(ItemStack item, ItemMeta itemMeta, Player playerClicked, Gui gui, boolean changedVote) {
+        DiscordWebhook.EmbedObject embedObject = plugin.getEmbedObject();
+        if (changedVote) {
+            embedObject.setTitle(playerClicked + " changed their vote to yes");
+        } else {
+            embedObject.setTitle(playerClicked + " voted yes");
+        }
+        embedObject.setDescription("Title: " + plugin.getSqlSettingsCache().select("title") + "\n" +
+                "Description: " + plugin.getSqlSettingsCache().select("description"));
+        cacheData.update("yes", playerClicked.getUniqueId().toString());
+        item.addEnchantment(Enchantment.LUCK, 1);
+        itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        item.setItemMeta(itemMeta);
+        gui.update();
+
+        embedObject.setDescription("Title: " + plugin.getSqlSettingsCache().select("title") + "\n" +
+                "Description: " + plugin.getSqlSettingsCache().select("description"));
+        plugin.executeWebhook();
     }
 }
