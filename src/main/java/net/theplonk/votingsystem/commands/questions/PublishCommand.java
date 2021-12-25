@@ -27,14 +27,19 @@ public class PublishCommand extends AbstractSubCommand {
         Map<String, Question> questions = config.getQuestions();
 
         if (VoteManager.isVoteRunning()) {
-            audience.sendMessage(config.getMessageComponentPlain("vote-running"));
+            audience.sendMessage(config.getMessageComponentPlain("vote running"));
             return true;
         }
 
         if (args.length > 0) {
             if (questions.containsKey(args[0])) {
-                VoteManager.setQuestion(questions.get(args[0]));
                 VoteManager.setVoteRunning(true);
+                // Only move forward if setQuestion returns true meaning everything ran correctly!
+                if (VoteManager.question(questions.get(args[0]))) {
+                    audience.sendMessage(config.getMessageComponentPlain("success vote running"));
+                };
+            } else {
+                audience.sendMessage(config.getMessageComponentPlain("id does not exist"));
             }
         }
         return true;

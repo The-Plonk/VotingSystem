@@ -11,10 +11,12 @@ import java.util.*;
 public class VotingSystemConfig {
 
     @Getter private final Map<String, Question> questions;
+    @Getter private final String discord_token;
     private final Map<String, Object> messages;
 
     public VotingSystemConfig() {
         questions = new HashMap<>();
+        discord_token = "000000000000000000000000000000";
         Question presetQuestion = new Question("mcMMO", "Should we add mcMMO?", "mcMMO is a very useful plugin!");
         questions.put(presetQuestion.name(), presetQuestion);
         messages = new HashMap<>();
