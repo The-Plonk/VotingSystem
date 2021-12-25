@@ -30,10 +30,15 @@
                         <configuration>
                             <outputFile>testing/plugins/${project.artifactId}.jar</outputFile>
                             <finalName>VotingSystem</finalName>
+                            <minimizeJar>true</minimizeJar>
                             <relocations>
                                 <relocation>
-                                    <pattern>net.kyori.adventure.text.minimessage</pattern>
-                                    <shadedPattern>net.theplonk.internal.minimessage</shadedPattern>
+                                    <shadedPattern>net.theplonk.internal</shadedPattern>
+                                    <includes>
+                                        <include>net.kyori.adventure-text-minimessage</include>
+                                        <include>com.github.Redempt</include>
+                                        <include>com.github.stefvanschie</include>
+                                    </includes>
                                 </relocation>
                             </relocations>
                         </configuration>

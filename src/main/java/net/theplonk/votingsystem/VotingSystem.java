@@ -77,7 +77,7 @@ public class VotingSystem extends JavaPlugin {
 
     public void initializeDatabase() {
         sqlDatabase.execute("CREATE TABLE IF NOT EXISTS votes ( uuid VARCHAR(36) PRIMARY KEY, vote BOOLEAN NOT NULL );");
-        sqlDatabase.execute("CREATE TABLE IF NOT EXISTS vote_data ( setting VARCHAR(50) PRIMARY KEY, value VARCHAR(255) PRIMARY KEY );");
+        sqlDatabase.execute("CREATE TABLE IF NOT EXISTS vote_data ( setting VARCHAR(50) PRIMARY KEY, value VARCHAR(255) NOT NULL );");
         sqlSettingsCache = sqlDatabase.createCache("vote_data", "value", "setting");
         sqlDataCache = sqlDatabase.createCache("votes", "vote", "uuid");
         sqlDatabase.setCommitInterval(1200);
