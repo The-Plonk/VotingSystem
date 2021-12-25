@@ -6,12 +6,14 @@ import net.theplonk.votingsystem.commands.BaseCommand;
 import net.theplonk.votingsystem.commands.VoteCommand;
 import net.theplonk.votingsystem.commands.questions.PublishCommand;
 import net.theplonk.votingsystem.objects.VotingSystemConfig;
+import net.theplonk.votingsystem.util.DiscordWebhook;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import redempt.redlib.config.ConfigManager;
 import redempt.redlib.sql.SQLCache;
 import redempt.redlib.sql.SQLHelper;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.util.Objects;
 
@@ -20,6 +22,8 @@ public class VotingSystem extends JavaPlugin {
     @Getter private static VotingSystem instance;
     @Getter private final VotingSystemConfig votingConfig = new VotingSystemConfig();
     @Getter private SQLHelper sqlDatabase;
+    @Getter private final DiscordWebhook discordWebhook = new DiscordWebhook(this.votingConfig.getDiscord_token());
+    @Getter private final DiscordWebhook.EmbedObject embedObject = new DiscordWebhook.EmbedObject();
     @Getter private SQLCache sqlSettingsCache;
     @Getter private SQLCache sqlDataCache;
     private ConfigManager configManager;
@@ -35,6 +39,7 @@ public class VotingSystem extends JavaPlugin {
         Connection connection = SQLHelper.openSQLite(this.getDataFolder().toPath().resolve("database.db"));
         this.sqlDatabase = new SQLHelper(connection);
         this.initializeDatabase();
+        this.initializeWebhook();
     }
 
     @Override
@@ -82,6 +87,21 @@ public class VotingSystem extends JavaPlugin {
         sqlDataCache = sqlDatabase.createCache("votes", "vote", "uuid");
         sqlDatabase.setCommitInterval(1200);
         sqlDatabase.close();
+    }
+
+    public void initializeWebhook() {
+        discordWebhook.setUsername("The Plonk SMP | Voting");
+        discordWebhook.setAvatarUrl("https://i.imgur.com/biyu4wv.png");
+        embedObject.setFooter("smp.theplonk.net", "https://i.imgur.com/biyu4wv.png");
+    }
+
+    public void executeWebhook()  {
+        discordWebhook.addEmbed(embedObject);
+        try {
+            discordWebhook.execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 

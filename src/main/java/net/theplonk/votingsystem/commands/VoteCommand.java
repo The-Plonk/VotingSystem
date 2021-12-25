@@ -3,6 +3,7 @@ package net.theplonk.votingsystem.commands;
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
+import litebans.api.Database;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -18,6 +19,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
+import java.util.Objects;
+import java.util.UUID;
 
 public class VoteCommand implements CommandExecutor {
 
@@ -40,7 +45,9 @@ public class VoteCommand implements CommandExecutor {
             ItemMeta signInfoMeta = signInfo.getItemMeta();
             signInfoMeta.displayName(MiniMessage.get().parse("<reset><red><bold>Test"));
             signInfo.setItemMeta(signInfoMeta);
-            staticPane.addItem(new GuiItem(signInfo), 4, 3);
+            staticPane.addItem(new GuiItem(signInfo, event -> {
+
+            }), 4, 3);
 
             ItemStack yesVote = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
             ItemMeta yesVoteMeta = yesVote.getItemMeta();
@@ -61,5 +68,11 @@ public class VoteCommand implements CommandExecutor {
 
         adventure.sender(sender).sendMessage(config.getMessageComponentPlain("only-players"));
         return true;
+    }
+
+    public boolean duplicateIPAddress(Player player) {
+        String IP = Objects.requireNonNull(player.getAddress()).getAddress().getHostAddress();
+        Collection<UUID> playersWithIP = Database.get().getUsersByIP(IP);
+        return playersWithIP.size() > 1;
     }
 }
