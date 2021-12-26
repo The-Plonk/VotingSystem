@@ -7,6 +7,7 @@ import net.theplonk.votingsystem.commands.VoteCommand;
 import net.theplonk.votingsystem.commands.questions.HelpCommand;
 import net.theplonk.votingsystem.commands.questions.PublishCommand;
 import net.theplonk.votingsystem.commands.questions.ReloadCommand;
+import net.theplonk.votingsystem.commands.questions.UnpublishCommand;
 import net.theplonk.votingsystem.objects.VotingSystemConfig;
 import net.theplonk.votingsystem.util.DiscordWebhook;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -67,6 +68,7 @@ public class VotingSystem extends JavaPlugin {
         questionCommand.registerSubCommand(new PublishCommand());
         questionCommand.registerSubCommand(new HelpCommand());
         questionCommand.registerSubCommand(new ReloadCommand());
+        questionCommand.registerSubCommand(new UnpublishCommand());
 
     }
 
@@ -107,9 +109,6 @@ public class VotingSystem extends JavaPlugin {
 
     public void executeWebhook()  {
         discordWebhook.setEmbed(embedObject);
-//        discordWebhook.addEmbed(new DiscordWebhook.EmbedObject()
-//                        .setTitle("test")
-//                        .setFooter("smp.theplonk.net", "https://i.imgur.com/biyu4wv.png"));
         try {
             discordWebhook.execute();
         } catch (IOException e) {
