@@ -2,7 +2,6 @@ package net.theplonk.votingsystem.commands;
 
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
-import com.github.stefvanschie.inventoryframework.gui.type.util.Gui;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import litebans.api.Database;
 import net.kyori.adventure.audience.Audience;
@@ -78,14 +77,14 @@ public class VoteCommand implements CommandExecutor {
                     if (cacheData.select(playerClicked.getUniqueId().toString()) != null) {
                         addRemoveEnchant(yesVote, yesVoteMeta, noVote, noVoteMeta);
                         gui.update();
-                        this.updateVote(playerClicked, gui, true, "yes");
+                        this.updateVote(playerClicked, true, "yes");
                     } else {
                         if (!duplicateIPAddress(playerClicked).join() && playedMoreThanTwoHours(playerClicked)) {
                             yesVoteMeta.addEnchant(Enchantment.LUCK, 1, true);
                             yesVoteMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                             yesVote.setItemMeta(yesVoteMeta);
                             gui.update();
-                            this.updateVote(playerClicked, gui, false, "yes");
+                            this.updateVote(playerClicked, false, "yes");
                         }
                     }
                 }
@@ -99,14 +98,14 @@ public class VoteCommand implements CommandExecutor {
                     if (cacheData.select(playerClicked.getUniqueId().toString()) != null) {
                         addRemoveEnchant(noVote, noVoteMeta, yesVote, yesVoteMeta);
                         gui.update();
-                        this.updateVote(playerClicked, gui, true, "no");
+                        this.updateVote(playerClicked, true, "no");
                     } else {
                         if (!duplicateIPAddress(playerClicked).join() && playedMoreThanTwoHours(playerClicked)) {
                             noVoteMeta.addEnchant(Enchantment.LUCK, 1, true);
                             noVoteMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                             noVote.setItemMeta(noVoteMeta);
                             gui.update();
-                            this.updateVote(playerClicked, gui, false, "no");
+                            this.updateVote(playerClicked, false, "no");
                         }
                     }
                 }
@@ -145,7 +144,7 @@ public class VoteCommand implements CommandExecutor {
         itemAdd.setItemMeta(itemMetaAdd);
     }
 
-    public void updateVote(Player playerClicked, Gui gui, boolean changedVote, String vote) {
+    public void updateVote(Player playerClicked, boolean changedVote, String vote) {
         DiscordWebhook.EmbedObject embedObject = plugin.getEmbedObject();
         if (changedVote) {
             embedObject.setTitle(playerClicked.getName() + " changed their vote to " + vote);
