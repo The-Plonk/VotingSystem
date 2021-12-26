@@ -53,8 +53,7 @@ public class VotingSystem extends JavaPlugin {
         }
 
         this.configManager.save();
-        this.sqlDataCache.flush();
-        this.sqlSettingsCache.flush();
+        this.getLogger().info("Committing Changes...");
         this.sqlDatabase.commit();
         this.sqlDatabase.close();
     }

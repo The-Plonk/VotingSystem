@@ -1,7 +1,5 @@
 package net.theplonk.votingsystem.managers;
 
-import lombok.Getter;
-import lombok.Setter;
 import net.theplonk.votingsystem.VotingSystem;
 import net.theplonk.votingsystem.objects.Question;
 import net.theplonk.votingsystem.objects.VotingSystemConfig;
@@ -10,8 +8,6 @@ import redempt.redlib.sql.SQLHelper;
 
 public class VoteManager {
 
-    @Getter @Setter
-    private static boolean voteRunning = false;
     private static final VotingSystem plugin = VotingSystem.getInstance();
 
     public static boolean question(Question question) {
@@ -19,15 +15,9 @@ public class VoteManager {
         sqlHelper.execute("DELETE FROM votes;");
         sqlHelper.execute("DELETE FROM vote_data;");
 
-        plugin.getSqlSettingsCache().select("title");
-        plugin.getSqlSettingsCache().select("description");
-        plugin.getSqlSettingsCache().select("vote_running");
-        plugin.getSqlSettingsCache().update(question.title(), "title");
-        plugin.getSqlSettingsCache().update(question.description(), "description");
-        plugin.getSqlSettingsCache().update(Boolean.toString(voteRunning), "vote_running");
-        plugin.getSqlSettingsCache().flush();
-        plugin.getSqlDatabase().commit();
-
+        sqlHelper.execute(String.format("INSERT INTO vote_data (setting, value) VALUES ('%s', '%s');", "title", question.title()));
+        sqlHelper.execute(String.format("INSERT INTO vote_data (setting, value) VALUES ('%s', '%s');", "description", question.description()));
+        sqlHelper.execute(String.format("INSERT INTO vote_data (setting, value) VALUES ('%s', %s);", "vote_running", true));
         return true;
     }
 
@@ -64,6 +54,12 @@ public class VoteManager {
         sqlHelper.execute("DELETE FROM votes;");
         sqlHelper.execute("DELETE FROM vote_data;");
         return true;
+    }
+
+    public static boolean isVoteRunning() {
+        String result = plugin.getSqlDatabase().querySingleResultString("SELECT value FROM vote_data WHERE setting='vote_running';");
+        if (result == null) return false;
+        return result.equals("1");
     }
 
 
