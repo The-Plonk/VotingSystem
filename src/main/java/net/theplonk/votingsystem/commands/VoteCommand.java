@@ -87,7 +87,8 @@ public class VoteCommand implements CommandExecutor {
             ItemMeta noVoteMeta = noVote.getItemMeta();
             noVoteMeta.displayName(MiniMessage.get().parse("<red>NO!"));
             noVote.setItemMeta(noVoteMeta);
-            staticPane.addItem(new GuiItem(noVote, event -> {gi
+            staticPane.addItem(new GuiItem(noVote, event -> {
+
                 if (event.getWhoClicked() instanceof Player playerClicked) {
                     if (cacheData.select(playerClicked.getUniqueId().toString()) != null) {
                         this.updateVote(event, yesVote, yesVoteMeta, playerClicked, gui, true, "no");
