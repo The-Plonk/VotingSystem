@@ -14,7 +14,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import redempt.redlib.config.ConfigManager;
-import redempt.redlib.sql.SQLCache;
 import redempt.redlib.sql.SQLHelper;
 
 import java.io.IOException;
@@ -28,8 +27,6 @@ public class VotingSystem extends JavaPlugin {
     @Getter private SQLHelper sqlDatabase;
     @Getter private final DiscordWebhook discordWebhook = new DiscordWebhook(this.votingConfig.getDiscord_url());
     @Getter private final DiscordWebhook.EmbedObject embedObject = new DiscordWebhook.EmbedObject();
-    @Getter private SQLCache sqlSettingsCache;
-    @Getter private SQLCache sqlDataCache;
     private ConfigManager configManager;
     private BukkitAudiences adventure;
 
@@ -54,9 +51,6 @@ public class VotingSystem extends JavaPlugin {
             this.adventure = null;
         }
 
-        this.configManager.save();
-        this.getLogger().info("Committing Changes...");
-        this.sqlDatabase.commit();
         this.sqlDatabase.close();
     }
 
@@ -83,6 +77,7 @@ public class VotingSystem extends JavaPlugin {
 
     public void loadConfigurations() {
         getLogger().info("Loading configurations...");
+        this.votingConfig.setMessages();
         configManager = ConfigManager.create(this)
                 .target(votingConfig).saveDefaults().load();
         getLogger().info("Loaded configurations!");
@@ -90,16 +85,16 @@ public class VotingSystem extends JavaPlugin {
 
     public void reloadConfigs() {
         getLogger().info("Loading configurations...");
+        this.votingConfig.setMessages();
+        this.getLogger().info(this.votingConfig.getMessageComponentPlain("test1").toString());
         configManager.reload();
         getLogger().info("Loaded configurations!");
     }
 
+
     public void initializeDatabase() {
         sqlDatabase.execute("CREATE TABLE IF NOT EXISTS votes ( uuid VARCHAR(36) PRIMARY KEY, vote BOOLEAN NOT NULL );");
         sqlDatabase.execute("CREATE TABLE IF NOT EXISTS vote_data ( setting VARCHAR(50) PRIMARY KEY, value VARCHAR(255) NOT NULL );");
-        sqlSettingsCache = sqlDatabase.createCache("vote_data", "value", "setting");
-        sqlDataCache = sqlDatabase.createCache("votes", "vote", "uuid");
-        sqlDatabase.setCommitInterval(1200);
     }
 
     public void initializeWebhook() {

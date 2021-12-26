@@ -25,7 +25,6 @@ public class HelpCommand extends AbstractSubCommand {
             for (Component component : config.getMessageComponentListPlain("help message")) {
                 audience.sendMessage(component);
             }
-
             return true;
         }
 
