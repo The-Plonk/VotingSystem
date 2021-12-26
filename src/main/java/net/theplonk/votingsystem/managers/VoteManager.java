@@ -18,7 +18,6 @@ public class VoteManager {
         SQLHelper sqlHelper = plugin.getSqlDatabase();
         sqlHelper.execute("DELETE FROM votes;");
         sqlHelper.execute("DELETE FROM vote_data;");
-        sqlHelper.close();
 
         plugin.getSqlSettingsCache().update(question.title(), "title");
         plugin.getSqlSettingsCache().update(question.description(), "description");
@@ -50,22 +49,15 @@ public class VoteManager {
                     "Results: " + resultWord + " wins!" + "\n" +
                     "  Yes Votes: " + resultYes + " votes\n" +
                     "  No Votes: " + resultNo + " votes");
-
-            plugin.executeWebhook();
-            sqlHelper.execute("DELETE FROM votes;");
-            sqlHelper.execute("DELETE FROM vote_data;");
-            sqlHelper.close();
         } else {
             embedObject.setTitle("Vote Canceled");
             embedObject.setDescription("Title: " + plugin.getSqlSettingsCache().select("title") + "\n" +
                     "Description: " + plugin.getSqlSettingsCache().select("description"));
-
-            plugin.executeWebhook();
-            sqlHelper.execute("DELETE FROM votes;");
-            sqlHelper.execute("DELETE FROM vote_data;");
-            sqlHelper.close();
         }
 
+        plugin.executeWebhook();
+        sqlHelper.execute("DELETE FROM votes;");
+        sqlHelper.execute("DELETE FROM vote_data;");
         return true;
     }
 

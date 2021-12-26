@@ -4,7 +4,9 @@ import lombok.Getter;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.theplonk.votingsystem.commands.BaseCommand;
 import net.theplonk.votingsystem.commands.VoteCommand;
+import net.theplonk.votingsystem.commands.questions.HelpCommand;
 import net.theplonk.votingsystem.commands.questions.PublishCommand;
+import net.theplonk.votingsystem.commands.questions.ReloadCommand;
 import net.theplonk.votingsystem.objects.VotingSystemConfig;
 import net.theplonk.votingsystem.util.DiscordWebhook;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -32,7 +34,6 @@ public class VotingSystem extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        this.registerCommands();
         // Create the BukkitAudience (adventure-api)
         this.adventure = BukkitAudiences.create(this);
         this.loadConfigurations();
@@ -40,6 +41,7 @@ public class VotingSystem extends JavaPlugin {
         this.sqlDatabase = new SQLHelper(connection);
         this.initializeDatabase();
         this.initializeWebhook();
+        this.registerCommands();
     }
 
     @Override
@@ -53,6 +55,7 @@ public class VotingSystem extends JavaPlugin {
         this.configManager.save();
         this.sqlDataCache.flush();
         this.sqlDatabase.commit();
+        this.sqlDatabase.close();
     }
 
     // Register commands
@@ -62,6 +65,8 @@ public class VotingSystem extends JavaPlugin {
         Objects.requireNonNull(this.getCommand("vote")).setExecutor(new VoteCommand());
         Objects.requireNonNull(this.getCommand("question")).setExecutor(questionCommand);
         questionCommand.registerSubCommand(new PublishCommand());
+        questionCommand.registerSubCommand(new HelpCommand());
+        questionCommand.registerSubCommand(new ReloadCommand());
 
     }
 
@@ -80,13 +85,18 @@ public class VotingSystem extends JavaPlugin {
         getLogger().info("Loaded configurations!");
     }
 
+    public void reloadConfigs() {
+        getLogger().info("Loading configurations...");
+        configManager.reload();
+        getLogger().info("Loaded configurations!");
+    }
+
     public void initializeDatabase() {
         sqlDatabase.execute("CREATE TABLE IF NOT EXISTS votes ( uuid VARCHAR(36) PRIMARY KEY, vote BOOLEAN NOT NULL );");
         sqlDatabase.execute("CREATE TABLE IF NOT EXISTS vote_data ( setting VARCHAR(50) PRIMARY KEY, value VARCHAR(255) NOT NULL );");
         sqlSettingsCache = sqlDatabase.createCache("vote_data", "value", "setting");
         sqlDataCache = sqlDatabase.createCache("votes", "vote", "uuid");
         sqlDatabase.setCommitInterval(1200);
-        sqlDatabase.close();
     }
 
     public void initializeWebhook() {
