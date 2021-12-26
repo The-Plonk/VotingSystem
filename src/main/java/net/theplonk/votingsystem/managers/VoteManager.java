@@ -26,25 +26,27 @@ public class VoteManager {
         SQLHelper sqlHelper = plugin.getSqlDatabase();
         DiscordWebhook.EmbedObject embedObject = plugin.getEmbedObject();
 
-        String title = plugin.getSqlDatabase().querySingleResultString("SELECT setting FROM vote_data WHERE setting='title';");
-        String description = plugin.getSqlDatabase().querySingleResultString("SELECT setting FROM vote_data WHERE setting='description';");
+        String title = plugin.getSqlDatabase().querySingleResultString("SELECT value FROM vote_data WHERE setting='title';");
+        String description = plugin.getSqlDatabase().querySingleResultString("SELECT value FROM vote_data WHERE setting='description';");
 
         if (report) {
             embedObject.setTitle("Vote Completed");
 
-            String resultWord;
-            int resultYes = sqlHelper.querySingleResult("SELECT COUNT(vote) FROM votes WHERE vote = true;");
-            int resultNo = sqlHelper.querySingleResult("SELECT COUNT(vote) FROM votes WHERE vote = false;");
+            String resultPhrase;
+            int resultYes = sqlHelper.querySingleResult("SELECT COUNT(vote) FROM votes WHERE vote = 'yes';");
+            int resultNo = sqlHelper.querySingleResult("SELECT COUNT(vote) FROM votes WHERE vote = 'no';");
             if (resultYes > resultNo) {
-                resultWord = "Yes";
+                resultPhrase = "Yes wins!";
+            } else if (resultYes == resultNo) {
+                resultPhrase = "Tie!";
             } else {
-                resultWord = "No";
+                resultPhrase = "No wins!";
             }
 
 
             embedObject.setDescription("Title: " + title + "\\n" +
                     "Description: " + description + "\\n\\n" +
-                    "Results: " + resultWord + " wins!" + "\\n" +
+                    "Results: " + resultPhrase + "\\n" +
                     "  Yes Votes: " + resultYes + " votes\\n" +
                     "  No Votes: " + resultNo + " votes");
         } else {

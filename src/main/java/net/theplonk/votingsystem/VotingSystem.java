@@ -11,6 +11,7 @@ import net.theplonk.votingsystem.commands.questions.UnpublishCommand;
 import net.theplonk.votingsystem.objects.VotingSystemConfig;
 import net.theplonk.votingsystem.util.DiscordWebhook;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import redempt.redlib.config.ConfigManager;
 import redempt.redlib.sql.SQLCache;
@@ -109,11 +110,16 @@ public class VotingSystem extends JavaPlugin {
 
     public void executeWebhook()  {
         discordWebhook.setEmbed(embedObject);
-        try {
-            discordWebhook.execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                try {
+                    discordWebhook.execute();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.runTaskAsynchronously(this);
     }
 
 

@@ -26,15 +26,15 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import redempt.redlib.sql.SQLCache;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class VoteCommand implements CommandExecutor {
 
     VotingSystem plugin = VotingSystem.getInstance();
     SQLCache cacheData = plugin.getSqlDataCache();
+    int coolDownTime = 60;
+    Map<UUID, Long> cooldowns = new HashMap<>();
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
@@ -44,8 +44,20 @@ public class VoteCommand implements CommandExecutor {
         if (sender instanceof Player player) {
             Audience playerAudience = adventure.player(player);
 
+            if (cooldowns.containsKey(player.getUniqueId())) {
+                long secondsLeft = ((cooldowns.get(player.getUniqueId()) / 1000) + coolDownTime) - (System.currentTimeMillis() / 1000);
+                if (secondsLeft > 0) {
+                    playerAudience.sendMessage(MiniMessage.get().parse(
+                            "<red>There is a vote cooldown of 60 seconds. You have " + secondsLeft +
+                                    " seconds left before you can run the command again!"));
+                    return true;
+                }
+            }
+
+            cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
+
             if (!VoteManager.isVoteRunning()) {
-                playerAudience.sendMessage(config.getMessageComponentPlain("vote not running"));
+                playerAudience.sendMessage(config.getMessageComponentPlain("vote not running player"));
                 return true;
             }
 
@@ -66,18 +78,36 @@ public class VoteCommand implements CommandExecutor {
             ItemStack yesVote = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
             ItemMeta yesVoteMeta = yesVote.getItemMeta();
             yesVoteMeta.displayName(MiniMessage.get().parse("<green>YES!"));
-            yesVote.setItemMeta(yesVoteMeta);
 
             ItemStack noVote = new ItemStack(Material.RED_STAINED_GLASS_PANE);
             ItemMeta noVoteMeta = noVote.getItemMeta();
             noVoteMeta.displayName(MiniMessage.get().parse("<red>NO!"));
+
+            String value = plugin.getSqlDatabase().querySingleResultString(
+                    String.format("SELECT vote FROM votes WHERE uuid='%s'", player.getUniqueId()));
+
+            if (value != null) {
+                if (value.equals("yes")) {
+                    yesVoteMeta.addEnchant(Enchantment.LUCK, 1, true);
+                    yesVoteMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                } else if (value.equals("no")) {
+                    noVoteMeta.addEnchant(Enchantment.LUCK, 1, true);
+                    noVoteMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                }
+            }
+
+            yesVote.setItemMeta(yesVoteMeta);
             noVote.setItemMeta(noVoteMeta);
+
             staticPane.addItem(new GuiItem(yesVote, event -> {
                 if (event.getWhoClicked() instanceof Player playerClicked) {
-                    if (cacheData.select(playerClicked.getUniqueId().toString()) != null) {
-                        addRemoveEnchant(yesVote, yesVoteMeta, noVote, noVoteMeta);
-                        gui.update();
-                        this.updateVote(playerClicked, true, "yes");
+                    if (value != null) {
+                        if (value.equals("no")) {
+                            addRemoveEnchant(yesVote, yesVoteMeta, noVote, noVoteMeta);
+                            gui.update();
+                            this.updateVote(playerClicked, true, "yes");
+                            playerClicked.closeInventory();
+                        }
                     } else {
                         if (!duplicateIPAddress(playerClicked).join() && playedMoreThanTwoHours(playerClicked)) {
                             yesVoteMeta.addEnchant(Enchantment.LUCK, 1, true);
@@ -85,6 +115,7 @@ public class VoteCommand implements CommandExecutor {
                             yesVote.setItemMeta(yesVoteMeta);
                             gui.update();
                             this.updateVote(playerClicked, false, "yes");
+                            playerClicked.closeInventory();
                         }
                     }
                 }
@@ -95,10 +126,13 @@ public class VoteCommand implements CommandExecutor {
             noVote.setItemMeta(noVoteMeta);
             staticPane.addItem(new GuiItem(noVote, event -> {
                 if (event.getWhoClicked() instanceof Player playerClicked) {
-                    if (cacheData.select(playerClicked.getUniqueId().toString()) != null) {
-                        addRemoveEnchant(noVote, noVoteMeta, yesVote, yesVoteMeta);
-                        gui.update();
-                        this.updateVote(playerClicked, true, "no");
+                    if (value != null) {
+                        if (value.equals("yes")) {
+                            addRemoveEnchant(noVote, noVoteMeta, yesVote, yesVoteMeta);
+                            gui.update();
+                            this.updateVote(playerClicked, true, "no");
+                            playerClicked.closeInventory();
+                        }
                     } else {
                         if (!duplicateIPAddress(playerClicked).join() && playedMoreThanTwoHours(playerClicked)) {
                             noVoteMeta.addEnchant(Enchantment.LUCK, 1, true);
@@ -106,6 +140,7 @@ public class VoteCommand implements CommandExecutor {
                             noVote.setItemMeta(noVoteMeta);
                             gui.update();
                             this.updateVote(playerClicked, false, "no");
+                            playerClicked.closeInventory();
                         }
                     }
                 }
@@ -152,13 +187,17 @@ public class VoteCommand implements CommandExecutor {
             embedObject.setTitle(playerClicked.getName() + " voted " + vote);
         }
 
-        String title = plugin.getSqlDatabase().querySingleResultString("SELECT setting FROM vote_data WHERE setting='title';");
-        String description = plugin.getSqlDatabase().querySingleResultString("SELECT setting FROM vote_data WHERE setting='description';");
+        String title = plugin.getSqlDatabase().querySingleResultString("SELECT value FROM vote_data WHERE setting='title';");
+        String description = plugin.getSqlDatabase().querySingleResultString("SELECT value FROM vote_data WHERE setting='description';");
 
         embedObject.setDescription("Title: " + title + "\\n" +
                 "Description: " + description);
 
-        plugin.getSqlDatabase().execute(String.format("INSERT INTO votes (uuid, vote) VALUES ('%s', '%s');", playerClicked.getUniqueId(), vote));
+        if (changedVote) {
+            plugin.getSqlDatabase().execute(String.format("UPDATE votes SET vote='%s' WHERE uuid='%s';", vote, playerClicked.getUniqueId()));
+        } else {
+            plugin.getSqlDatabase().execute(String.format("INSERT INTO votes (uuid, vote) VALUES ('%s', '%s');", playerClicked.getUniqueId(), vote));
+        }
         plugin.executeWebhook();
     }
 }

@@ -33,6 +33,7 @@ public class VotingSystemConfig {
         messages.put("success unpublish vote", "<green>You successfully unpublished the current question!");
         messages.put("invalid unpublish vote", "<red>You did not give a valid option. Please type in yes or no to get results.");
         messages.put("vote not running", "<red>No vote is currently running! Use /question publish to publish a vote!");
+        messages.put("vote not running player", "<red>No vote is currently running!");
     }
 
     public Component getMessageComponentPlain(String key) {
