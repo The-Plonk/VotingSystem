@@ -43,7 +43,7 @@ public class VotingSystemConfig {
         ));
         messages.putIfAbsent("successfully reloaded", "<yellow>Successfully reloaded the configuration!");
         messages.putIfAbsent("success vote running", "<green>The vote is now running!");
-        messages.putIfAbsent("success unpublish vote", "<green>You successfully unpublished the current question! &7(Output on discord)");
+        messages.putIfAbsent("success unpublish vote", "<green>You successfully unpublished the current question! <gray>(Output on discord)");
         messages.putIfAbsent("invalid unpublish vote", "<red>You did not give a valid option. Please type in yes or no as the argument for getting results.");
         messages.putIfAbsent("vote not running", "<red>No vote is currently running! Use /question publish to publish a vote!");
         messages.putIfAbsent("vote not running player", "<red>No vote is currently running!");
@@ -53,6 +53,10 @@ public class VotingSystemConfig {
         messages.putIfAbsent("set no", "<green>You successfully set your vote to NO!");
         messages.putIfAbsent("id does not exist", "<red>You did not provide a valid ID. IDs: <valid>");
         messages.putIfAbsent("provide publish arg", "<red>You didn't include an ID. IDs: <valid>");
+        messages.putIfAbsent("both conditions not met", "<red>Your IP already voted and you don't have 2 hours of playtime!");
+        messages.putIfAbsent("ip already voted", "<red>Your IP address has already voted!");
+        messages.putIfAbsent("not enough playtime", "<red>You don't meet the playtime requirement of 2 hours!");
+        messages.putIfAbsent("secret requirements not met", "<red>You don't meet the requirements to vote!");
         messages.putIfAbsent("active message", List.of(
                 "",
                 "<gold>Title: <yellow><title>",

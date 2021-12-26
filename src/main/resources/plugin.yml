@@ -3,7 +3,7 @@ author: Intriguing
 version: 1.0-SNAPSHOT
 api-version: 1.18
 depend:
-  - RedLib
+  - LiteBans
 main: net.theplonk.votingsystem.VotingSystem
 commands:
   vote:

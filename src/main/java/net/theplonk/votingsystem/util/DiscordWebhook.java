@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public class DiscordWebhook {
 
-    private final String url;
+    private String url;
     private String content;
     private String username;
     private String avatarUrl;
@@ -34,6 +34,10 @@ public class DiscordWebhook {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public void setUsername(String username) {

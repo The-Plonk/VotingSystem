@@ -16,7 +16,9 @@ import net.theplonk.votingsystem.VotingSystem;
 import net.theplonk.votingsystem.managers.VoteManager;
 import net.theplonk.votingsystem.objects.VotingSystemConfig;
 import net.theplonk.votingsystem.util.DiscordWebhook;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Statistic;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -29,8 +31,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class VoteCommand implements CommandExecutor {
@@ -124,7 +126,7 @@ public class VoteCommand implements CommandExecutor {
                             playerAudience.playSound(denySound, Sound.Emitter.self());
                         }
                     } else {
-                        if (!duplicateIPAddress(playerClicked).join() && playedMoreThanTwoHours(playerClicked)) {
+                        if (!this.IPAlreadyVoted(playerClicked) && playedMoreThanTwoHours(playerClicked) && secretRequirements(playerClicked)) {
                             yesVoteMeta.displayName(MiniMessage.get().parse("<green><bold>YES <reset><gray>(Selected)").decoration(TextDecoration.ITALIC, false));
                             yesVoteMeta.addEnchant(Enchantment.LUCK, 1, true);
                             yesVoteMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -135,6 +137,8 @@ public class VoteCommand implements CommandExecutor {
                             playerClicked.closeInventory();
                             playerAudience.playSound(acceptableSound, Sound.Emitter.self());
                             playerAudience.sendMessage(config.getMessageComponentPlain("set yes"));
+                        } else {
+                            this.runConditionNotMet(playerClicked, playerAudience, denySound);
                         }
                     }
                 }
@@ -157,7 +161,7 @@ public class VoteCommand implements CommandExecutor {
                             playerAudience.playSound(denySound, Sound.Emitter.self());
                         }
                     } else {
-                        if (!duplicateIPAddress(playerClicked).join() && playedMoreThanTwoHours(playerClicked)) {
+                        if (!this.IPAlreadyVoted(playerClicked) && playedMoreThanTwoHours(playerClicked) && secretRequirements(playerClicked)) {
                             noVoteMeta.displayName(MiniMessage.get().parse("<red><bold>NO <reset><gray>(Selected)").decoration(TextDecoration.ITALIC, false));
                             noVoteMeta.addEnchant(Enchantment.LUCK, 1, true);
                             noVoteMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -168,6 +172,8 @@ public class VoteCommand implements CommandExecutor {
                             playerClicked.closeInventory();
                             playerAudience.playSound(acceptableSound, Sound.Emitter.self());
                             playerAudience.sendMessage(config.getMessageComponentPlain("set no"));
+                        } else {
+                            this.runConditionNotMet(playerClicked, playerAudience, denySound);
                         }
                     }
                 }
@@ -188,12 +194,37 @@ public class VoteCommand implements CommandExecutor {
         return true;
     }
 
-    public CompletableFuture<Boolean> duplicateIPAddress(Player player) {
+    public boolean IPAlreadyVoted(Player player) {
+        Collection<UUID> uuids = duplicateIPAddress(player).join();
+        for (UUID uuid : uuids) {
+            String value = plugin.getSqlDatabase().querySingleResultString(
+                    String.format("SELECT vote FROM votes WHERE uuid='%s'", uuid));
+            if (value != null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void runConditionNotMet(Player player, Audience audience, Sound denySound) {
+        VotingSystemConfig config = plugin.getVotingConfig();
+        player.closeInventory();
+        audience.playSound(denySound, Sound.Emitter.self());
+        if (this.IPAlreadyVoted(player) && !playedMoreThanTwoHours(player)) {
+            audience.sendMessage(config.getMessageComponentPlain("both conditions not met"));
+        } else if (this.IPAlreadyVoted(player) && playedMoreThanTwoHours(player)) {
+            audience.sendMessage(config.getMessageComponentPlain("ip already voted"));
+        } else if (!this.IPAlreadyVoted(player) && !playedMoreThanTwoHours(player)) {
+            audience.sendMessage(config.getMessageComponentPlain("not enough playtime"));
+        } else {
+            audience.sendMessage(config.getMessageComponentPlain("secret requirements not met"));
+        }
+    }
+
+    public CompletableFuture<Collection<UUID>> duplicateIPAddress(Player player) {
         String IP = Objects.requireNonNull(player.getAddress()).getAddress().getHostAddress();
-        return CompletableFuture.supplyAsync(() -> {
-                Collection<UUID> playersWithIP = Database.get().getUsersByIP(IP);
-                return playersWithIP.size() > 1;
-            }).exceptionally(e -> {
+        return CompletableFuture.supplyAsync(() -> Database.get().getUsersByIP(IP)).exceptionally(e -> {
                 e.printStackTrace();
                 return null;
         });
@@ -201,6 +232,14 @@ public class VoteCommand implements CommandExecutor {
 
     public boolean playedMoreThanTwoHours(Player player) {
         return player.getStatistic(Statistic.PLAY_ONE_MINUTE) >= 144000;
+    }
+
+    public boolean secretRequirements(Player player) {
+        return player.getStatistic(Statistic.CRAFTING_TABLE_INTERACTION) >= 1 &&
+                player.getStatistic(Statistic.FURNACE_INTERACTION) >= 1 &&
+                player.getStatistic(Statistic.WALK_ONE_CM) >= 42 * 100 &
+                player.getAdvancementProgress(Objects.requireNonNull(Bukkit.getAdvancement(
+                        Objects.requireNonNull(NamespacedKey.fromString("story/mine_stone"))))).isDone();
     }
 
     public void addRemoveEnchant(ItemStack itemAdd, ItemMeta itemMetaAdd, ItemStack itemRemove, ItemMeta itemMetaRemove) {

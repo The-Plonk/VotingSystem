@@ -4,10 +4,7 @@ import lombok.Getter;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.theplonk.votingsystem.commands.BaseCommand;
 import net.theplonk.votingsystem.commands.VoteCommand;
-import net.theplonk.votingsystem.commands.questions.HelpCommand;
-import net.theplonk.votingsystem.commands.questions.PublishCommand;
-import net.theplonk.votingsystem.commands.questions.ReloadCommand;
-import net.theplonk.votingsystem.commands.questions.UnpublishCommand;
+import net.theplonk.votingsystem.commands.questions.*;
 import net.theplonk.votingsystem.objects.VotingSystemConfig;
 import net.theplonk.votingsystem.util.DiscordWebhook;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -64,6 +61,7 @@ public class VotingSystem extends JavaPlugin {
         questionCommand.registerSubCommand(new HelpCommand());
         questionCommand.registerSubCommand(new ReloadCommand());
         questionCommand.registerSubCommand(new UnpublishCommand());
+        questionCommand.registerSubCommand(new ActiveCommand());
 
     }
 
@@ -86,7 +84,6 @@ public class VotingSystem extends JavaPlugin {
     public void reloadConfigs() {
         getLogger().info("Loading configurations...");
         this.votingConfig.setMessages();
-        this.getLogger().info(this.votingConfig.getMessageComponentPlain("test1").toString());
         configManager.reload();
         getLogger().info("Loaded configurations!");
     }
@@ -105,6 +102,7 @@ public class VotingSystem extends JavaPlugin {
 
     public void executeWebhook()  {
         discordWebhook.setEmbed(embedObject);
+        discordWebhook.setUrl(this.votingConfig.getDiscord_url());
         new BukkitRunnable() {
             @Override
             public void run() {

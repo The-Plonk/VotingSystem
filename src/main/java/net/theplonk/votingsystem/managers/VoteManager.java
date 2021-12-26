@@ -24,9 +24,9 @@ public class VoteManager {
         DiscordWebhook.EmbedObject embedObject = plugin.getEmbedObject();
         embedObject.setTitle("New Vote Published");
         embedObject.setDescription("Title: " + question.title() + "\\n" +
-                "Description: " + question.description() + "\\n" +
+                "Description: " + question.description() + "\\n\\n" +
                 "Join `smp.theplonk.net` to vote!");
-        embedObject.setColor(Color.decode("d15ae6"));
+        embedObject.setColor(Color.decode("#d15ae6"));
 
         plugin.executeWebhook();
         return true;
