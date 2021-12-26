@@ -28,7 +28,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class VoteCommand implements CommandExecutor {
@@ -223,6 +225,12 @@ public class VoteCommand implements CommandExecutor {
 
         embedObject.setDescription("Title: " + title + "\\n" +
                 "Description: " + description);
+
+        if (vote.equals("no")) {
+            embedObject.setColor(Color.decode("#990c0c"));
+        } else {
+            embedObject.setColor(Color.decode("#5af024"));
+        }
 
         if (changedVote) {
             plugin.getSqlDatabase().execute(String.format("UPDATE votes SET vote='%s' WHERE uuid='%s';", vote, playerClicked.getUniqueId()));

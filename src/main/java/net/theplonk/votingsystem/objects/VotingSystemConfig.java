@@ -18,7 +18,7 @@ public class VotingSystemConfig {
 
     @Getter private final Map<String, Question> questions = new HashMap<>();
     @Getter @ConfigName("discord webhook url") private final String discord_url;
-    @Getter private Map<String, Object> messages = new HashMap<>();
+    @Getter private final Map<String, Object> messages = new HashMap<>();
 
     public VotingSystemConfig() {
         discord_url = "https://discord.com/api/webhooks/924470586955149352/gPWGEQ17MJLdazb5eLtMS_BtD4H4qCrYHEG2BohJsxWVYJra6gN3d1Ux28Uvb3zUWrnC";
@@ -53,6 +53,14 @@ public class VotingSystemConfig {
         messages.putIfAbsent("set no", "<green>You successfully set your vote to NO!");
         messages.putIfAbsent("id does not exist", "<red>You did not provide a valid ID. IDs: <valid>");
         messages.putIfAbsent("provide publish arg", "<red>You didn't include an ID. IDs: <valid>");
+        messages.putIfAbsent("active message", List.of(
+                "",
+                "<gold>Title: <yellow><title>",
+                "<gold>Description: <yellow><description>",
+                "<gold>Yes Count: <yellow><yes-count>",
+                "<gold>No Count: <yellow><no-count>",
+                ""
+        ));
     }
 
     public Component getMessageComponentPlain(String key, List<Template> placeholders) {

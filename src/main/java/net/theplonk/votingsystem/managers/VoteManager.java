@@ -6,6 +6,8 @@ import net.theplonk.votingsystem.objects.VotingSystemConfig;
 import net.theplonk.votingsystem.util.DiscordWebhook;
 import redempt.redlib.sql.SQLHelper;
 
+import java.awt.*;
+
 public class VoteManager {
 
     private static final VotingSystem plugin = VotingSystem.getInstance();
@@ -18,6 +20,15 @@ public class VoteManager {
         sqlHelper.execute(String.format("INSERT INTO vote_data (setting, value) VALUES ('%s', '%s');", "title", question.title()));
         sqlHelper.execute(String.format("INSERT INTO vote_data (setting, value) VALUES ('%s', '%s');", "description", question.description()));
         sqlHelper.execute(String.format("INSERT INTO vote_data (setting, value) VALUES ('%s', %s);", "vote_running", true));
+
+        DiscordWebhook.EmbedObject embedObject = plugin.getEmbedObject();
+        embedObject.setTitle("New Vote Published");
+        embedObject.setDescription("Title: " + question.title() + "\\n" +
+                "Description: " + question.description() + "\\n" +
+                "Join `smp.theplonk.net` to vote!");
+        embedObject.setColor(Color.decode("d15ae6"));
+
+        plugin.executeWebhook();
         return true;
     }
 
@@ -55,6 +66,7 @@ public class VoteManager {
                     "Description: " + description);
         }
 
+        embedObject.setColor(Color.decode("#45c1ff"));
         plugin.executeWebhook();
         sqlHelper.execute("DELETE FROM votes;");
         sqlHelper.execute("DELETE FROM vote_data;");
