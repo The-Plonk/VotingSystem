@@ -26,6 +26,9 @@ public class VoteManager {
         SQLHelper sqlHelper = plugin.getSqlDatabase();
         DiscordWebhook.EmbedObject embedObject = plugin.getEmbedObject();
 
+        String title = plugin.getSqlDatabase().querySingleResultString("SELECT setting FROM vote_data WHERE setting='title';");
+        String description = plugin.getSqlDatabase().querySingleResultString("SELECT setting FROM vote_data WHERE setting='description';");
+
         if (report) {
             embedObject.setTitle("Vote Completed");
 
@@ -39,15 +42,15 @@ public class VoteManager {
             }
 
 
-            embedObject.setDescription("Title: " + plugin.getSqlSettingsCache().select("title") + "\n" +
-                    "Description: " + plugin.getSqlSettingsCache().select("description") + "\n\n" +
-                    "Results: " + resultWord + " wins!" + "\n" +
-                    "  Yes Votes: " + resultYes + " votes\n" +
+            embedObject.setDescription("Title: " + title + "\\n" +
+                    "Description: " + description + "\\n\\n" +
+                    "Results: " + resultWord + " wins!" + "\\n" +
+                    "  Yes Votes: " + resultYes + " votes\\n" +
                     "  No Votes: " + resultNo + " votes");
         } else {
             embedObject.setTitle("Vote Canceled");
-            embedObject.setDescription("Title: " + plugin.getSqlSettingsCache().select("title") + "\n" +
-                    "Description: " + plugin.getSqlSettingsCache().select("description"));
+            embedObject.setDescription("Title: " + title + "\\n" +
+                    "Description: " + description);
         }
 
         plugin.executeWebhook();
