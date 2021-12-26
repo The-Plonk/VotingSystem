@@ -19,9 +19,14 @@ public class VoteManager {
         sqlHelper.execute("DELETE FROM votes;");
         sqlHelper.execute("DELETE FROM vote_data;");
 
+        plugin.getSqlSettingsCache().select("title");
+        plugin.getSqlSettingsCache().select("description");
+        plugin.getSqlSettingsCache().select("vote_running");
         plugin.getSqlSettingsCache().update(question.title(), "title");
         plugin.getSqlSettingsCache().update(question.description(), "description");
         plugin.getSqlSettingsCache().update(Boolean.toString(voteRunning), "vote_running");
+        plugin.getSqlSettingsCache().flush();
+        plugin.getSqlDatabase().commit();
 
         return true;
     }

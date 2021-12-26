@@ -24,7 +24,7 @@ public class VotingSystem extends JavaPlugin {
     @Getter private static VotingSystem instance;
     @Getter private final VotingSystemConfig votingConfig = new VotingSystemConfig();
     @Getter private SQLHelper sqlDatabase;
-    @Getter private final DiscordWebhook discordWebhook = new DiscordWebhook(this.votingConfig.getDiscord_token());
+    @Getter private final DiscordWebhook discordWebhook = new DiscordWebhook(this.votingConfig.getDiscord_url());
     @Getter private final DiscordWebhook.EmbedObject embedObject = new DiscordWebhook.EmbedObject();
     @Getter private SQLCache sqlSettingsCache;
     @Getter private SQLCache sqlDataCache;
@@ -54,6 +54,7 @@ public class VotingSystem extends JavaPlugin {
 
         this.configManager.save();
         this.sqlDataCache.flush();
+        this.sqlSettingsCache.flush();
         this.sqlDatabase.commit();
         this.sqlDatabase.close();
     }
@@ -106,7 +107,10 @@ public class VotingSystem extends JavaPlugin {
     }
 
     public void executeWebhook()  {
-        discordWebhook.addEmbed(embedObject);
+        discordWebhook.setEmbed(embedObject);
+//        discordWebhook.addEmbed(new DiscordWebhook.EmbedObject()
+//                        .setTitle("test")
+//                        .setFooter("smp.theplonk.net", "https://i.imgur.com/biyu4wv.png"));
         try {
             discordWebhook.execute();
         } catch (IOException e) {

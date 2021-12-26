@@ -4,6 +4,7 @@ import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import redempt.redlib.config.annotations.ConfigMappable;
+import redempt.redlib.config.annotations.ConfigName;
 
 import java.util.*;
 
@@ -11,11 +12,11 @@ import java.util.*;
 public class VotingSystemConfig {
 
     @Getter private final Map<String, Question> questions = new HashMap<>();
-    @Getter private final String discord_token;
+    @Getter @ConfigName("discord webhook url") private final String discord_url;
     private final Map<String, Object> messages = new HashMap<>();
 
     public VotingSystemConfig() {
-        discord_token = "000000000000000000000000000000";
+        discord_url = "https://discord.com/api/webhooks/924470586955149352/gPWGEQ17MJLdazb5eLtMS_BtD4H4qCrYHEG2BohJsxWVYJra6gN3d1Ux28Uvb3zUWrnC";
         Question presetQuestion = new Question("mcMMO", "Should we add mcMMO?", "mcMMO is a very useful plugin!");
         questions.put(presetQuestion.name(), presetQuestion);
         this.setMessages();
