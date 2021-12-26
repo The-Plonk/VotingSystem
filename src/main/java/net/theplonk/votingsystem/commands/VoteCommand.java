@@ -30,6 +30,7 @@ import redempt.redlib.sql.SQLCache;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class VoteCommand implements CommandExecutor {
 
@@ -71,7 +72,7 @@ public class VoteCommand implements CommandExecutor {
                     if (cacheData.select(playerClicked.getUniqueId().toString()) != null) {
                         this.updateYes(yesVote, yesVoteMeta, playerClicked, gui, true);
                     } else {
-                        if (!duplicateIPAddress(playerClicked) && playedMoreThanTwoHours(playerClicked)) {
+                        if (!duplicateIPAddress(playerClicked).join() && playedMoreThanTwoHours(playerClicked)) {
                             this.updateYes(yesVote, yesVoteMeta, playerClicked, gui, false);
                         }
                     }
@@ -97,10 +98,15 @@ public class VoteCommand implements CommandExecutor {
         return true;
     }
 
-    public boolean duplicateIPAddress(Player player) {
-        String IP = Objects.requireNonNull(player.getAddress()).getAddress().getHostAddress();
-        Collection<UUID> playersWithIP = Database.get().getUsersByIP(IP);
-        return playersWithIP.size() > 1;
+    public CompletableFuture<Boolean> duplicateIPAddress(Player player) {
+        return CompletableFuture.supplyAsync(() -> {
+                String IP = Objects.requireNonNull(player.getAddress()).getAddress().getHostAddress();
+                Collection<UUID> playersWithIP = Database.get().getUsersByIP(IP);
+                return playersWithIP.size() > 1;
+            }).exceptionally(e -> {
+                e.printStackTrace();
+                return null;
+        });
     }
 
     public boolean playedMoreThanTwoHours(Player player) {
