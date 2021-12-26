@@ -21,9 +21,15 @@ public class HelpCommand extends AbstractSubCommand {
         VotingSystemConfig config = plugin.getVotingConfig();
         Audience audience = plugin.getAdventure().sender(sender);
 
-        for (Component component : config.getMessageComponentListPlain("help message")) {
-            audience.sendMessage(component);
+        if (sender.hasPermission("votingsystem.question.help")) {
+            for (Component component : config.getMessageComponentListPlain("help message")) {
+                audience.sendMessage(component);
+            }
+
+            return true;
         }
+
+        audience.sendMessage(config.getMessageComponentPlain("no permission"));
 
         return true;
     }

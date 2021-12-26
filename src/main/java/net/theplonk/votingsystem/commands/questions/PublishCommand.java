@@ -24,6 +24,11 @@ public class PublishCommand extends AbstractSubCommand {
         VotingSystemConfig config = plugin.getVotingConfig();
         Audience audience = plugin.getAdventure().sender(sender);
 
+        if (!sender.hasPermission("votingsystem.question.publish")) {
+            audience.sendMessage(config.getMessageComponentPlain("no permission"));
+            return true;
+        }
+
         Map<String, Question> questions = config.getQuestions();
 
         if (VoteManager.isVoteRunning()) {

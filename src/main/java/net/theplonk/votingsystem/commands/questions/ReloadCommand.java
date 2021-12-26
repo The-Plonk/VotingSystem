@@ -17,10 +17,15 @@ public class ReloadCommand extends AbstractSubCommand {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         VotingSystem plugin = VotingSystem.getInstance();
-        VotingSystemConfig config = plugin.getVotingConfig();
-        plugin.reloadConfigs();
-
         Audience audience = plugin.getAdventure().sender(sender);
+        VotingSystemConfig config = plugin.getVotingConfig();
+
+        if (!sender.hasPermission("votingsystem.question.reload")) {
+            audience.sendMessage(config.getMessageComponentPlain("no permission"));
+            return true;
+        }
+
+        plugin.reloadConfigs();
         audience.sendMessage(config.getMessageComponentPlain("successfully reloaded"));
         return true;
     }

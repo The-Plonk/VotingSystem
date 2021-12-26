@@ -31,9 +31,13 @@ public class VotingSystemConfig {
         messages.put("successfully reloaded", "<yellow>Successfully reloaded the configuration!");
         messages.put("success vote running", "<green>The vote is now running!");
         messages.put("success unpublish vote", "<green>You successfully unpublished the current question!");
-        messages.put("invalid unpublish vote", "<red>You did not give a valid option. Please type in yes or no to get results.");
+        messages.put("invalid unpublish vote", "<red>You did not give a valid option. Please type in yes or no as the argument for getting results.");
         messages.put("vote not running", "<red>No vote is currently running! Use /question publish to publish a vote!");
         messages.put("vote not running player", "<red>No vote is currently running!");
+        messages.put("updated yes", "<green>You successfully updated your vote to YES!");
+        messages.put("set yes", "<green>You successfully set your vote to YES!");
+        messages.put("updated no", "<green>You successfully updated your vote to NO!");
+        messages.put("set no", "<green>You successfully set your vote to NO!");
     }
 
     public Component getMessageComponentPlain(String key) {

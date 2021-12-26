@@ -67,7 +67,7 @@ public class VoteCommand implements CommandExecutor {
             ChestGui gui = new ChestGui(4, "The Plonk SMP | Voting");
             gui.setOnGlobalClick(e -> e.setCancelled(true));
             StaticPane staticPane = new StaticPane(9, 4);
-
+            staticPane.setOnClick(e -> playerAudience.playSound(openMenuSound, Sound.Emitter.self()));
 
             ItemStack signInfo = new ItemStack(Material.OAK_SIGN);
             ItemMeta signInfoMeta = signInfo.getItemMeta();
@@ -107,6 +107,7 @@ public class VoteCommand implements CommandExecutor {
                             gui.update();
                             this.updateVote(playerClicked, true, "yes");
                             playerClicked.closeInventory();
+                            playerAudience.sendMessage(config.getMessageComponentPlain("updated yes"));
                         }
                     } else {
                         if (!duplicateIPAddress(playerClicked).join() && playedMoreThanTwoHours(playerClicked)) {
@@ -116,6 +117,7 @@ public class VoteCommand implements CommandExecutor {
                             gui.update();
                             this.updateVote(playerClicked, false, "yes");
                             playerClicked.closeInventory();
+                            playerAudience.sendMessage(config.getMessageComponentPlain("set yes"));
                         }
                     }
                 }
@@ -132,6 +134,7 @@ public class VoteCommand implements CommandExecutor {
                             gui.update();
                             this.updateVote(playerClicked, true, "no");
                             playerClicked.closeInventory();
+                            playerAudience.sendMessage(config.getMessageComponentPlain("updated no"));
                         }
                     } else {
                         if (!duplicateIPAddress(playerClicked).join() && playedMoreThanTwoHours(playerClicked)) {
@@ -141,6 +144,7 @@ public class VoteCommand implements CommandExecutor {
                             gui.update();
                             this.updateVote(playerClicked, false, "no");
                             playerClicked.closeInventory();
+                            playerAudience.sendMessage(config.getMessageComponentPlain("set no"));
                         }
                     }
                 }

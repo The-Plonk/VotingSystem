@@ -21,6 +21,11 @@ public class UnpublishCommand extends AbstractSubCommand {
         VotingSystemConfig config = plugin.getVotingConfig();
         Audience audience = plugin.getAdventure().sender(sender);
 
+        if (!sender.hasPermission("votingsystem.question.unpublish")) {
+            audience.sendMessage(config.getMessageComponentPlain("no permission"));
+            return true;
+        }
+
         if (VoteManager.isVoteRunning()) {
             if (args.length > 0) {
                 switch (args[0].toLowerCase()) {
@@ -36,6 +41,8 @@ public class UnpublishCommand extends AbstractSubCommand {
                         audience.sendMessage(config.getMessageComponentPlain("invalid unpublish vote"));
                         break;
                 }
+            } else {
+                audience.sendMessage(config.getMessageComponentPlain("invalid unpublish vote"));
             }
         } else {
             audience.sendMessage(config.getMessageComponentPlain("vote not running"));
