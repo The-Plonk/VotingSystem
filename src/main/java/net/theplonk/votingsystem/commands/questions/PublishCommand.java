@@ -33,7 +33,6 @@ public class PublishCommand extends AbstractSubCommand {
 
         if (args.length > 0) {
             if (questions.containsKey(args[0])) {
-                VoteManager.setVoteRunning(true);
                 // Only move forward if setQuestion returns true meaning everything ran correctly!
                 if (VoteManager.question(questions.get(args[0]))) {
                     audience.sendMessage(config.getMessageComponentPlain("success vote running"));

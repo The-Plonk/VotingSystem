@@ -21,7 +21,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -69,32 +68,45 @@ public class VoteCommand implements CommandExecutor {
             ItemMeta yesVoteMeta = yesVote.getItemMeta();
             yesVoteMeta.displayName(MiniMessage.get().parse("<green>YES!"));
             yesVote.setItemMeta(yesVoteMeta);
+
+            ItemStack noVote = new ItemStack(Material.RED_STAINED_GLASS_PANE);
+            ItemMeta noVoteMeta = noVote.getItemMeta();
+            noVoteMeta.displayName(MiniMessage.get().parse("<red>NO!"));
+            noVote.setItemMeta(noVoteMeta);
             staticPane.addItem(new GuiItem(yesVote, event -> {
                 if (event.getWhoClicked() instanceof Player playerClicked) {
                     if (cacheData.select(playerClicked.getUniqueId().toString()) != null) {
-                        this.updateVote(event, yesVote, yesVoteMeta, playerClicked, gui, true, "yes");
+                        addRemoveEnchant(yesVote, yesVoteMeta, noVote, noVoteMeta);
+                        gui.update();
+                        this.updateVote(playerClicked, gui, true, "yes");
                     } else {
                         if (!duplicateIPAddress(playerClicked).join() && playedMoreThanTwoHours(playerClicked)) {
-                            this.updateVote(event, yesVote, yesVoteMeta, playerClicked, gui, false, "yes");
+                            yesVoteMeta.addEnchant(Enchantment.LUCK, 1, true);
+                            yesVoteMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                            yesVote.setItemMeta(yesVoteMeta);
+                            gui.update();
+                            this.updateVote(playerClicked, gui, false, "yes");
                         }
                     }
                 }
             }), 2, 1);
 
 
-
-            ItemStack noVote = new ItemStack(Material.RED_STAINED_GLASS_PANE);
-            ItemMeta noVoteMeta = noVote.getItemMeta();
             noVoteMeta.displayName(MiniMessage.get().parse("<red>NO!"));
             noVote.setItemMeta(noVoteMeta);
             staticPane.addItem(new GuiItem(noVote, event -> {
-
                 if (event.getWhoClicked() instanceof Player playerClicked) {
                     if (cacheData.select(playerClicked.getUniqueId().toString()) != null) {
-                        this.updateVote(event, yesVote, yesVoteMeta, playerClicked, gui, true, "no");
+                        addRemoveEnchant(noVote, noVoteMeta, yesVote, yesVoteMeta);
+                        gui.update();
+                        this.updateVote(playerClicked, gui, true, "no");
                     } else {
                         if (!duplicateIPAddress(playerClicked).join() && playedMoreThanTwoHours(playerClicked)) {
-                            this.updateVote(event, yesVote, yesVoteMeta, playerClicked, gui, false, "no");
+                            noVoteMeta.addEnchant(Enchantment.LUCK, 1, true);
+                            noVoteMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                            noVote.setItemMeta(noVoteMeta);
+                            gui.update();
+                            this.updateVote(playerClicked, gui, false, "no");
                         }
                     }
                 }
@@ -124,20 +136,30 @@ public class VoteCommand implements CommandExecutor {
         return player.getStatistic(Statistic.PLAY_ONE_MINUTE) >= 144000;
     }
 
-    public void updateVote(InventoryClickEvent event, ItemStack item, ItemMeta itemMeta, Player playerClicked, Gui gui, boolean changedVote, String vote) {
+    public void addRemoveEnchant(ItemStack itemAdd, ItemMeta itemMetaAdd, ItemStack itemRemove, ItemMeta itemMetaRemove) {
+        itemMetaRemove.removeEnchant(Enchantment.LUCK);
+        itemMetaRemove.removeItemFlags(ItemFlag.HIDE_ENCHANTS);
+        itemRemove.setItemMeta(itemMetaRemove);
+        itemMetaAdd.addEnchant(Enchantment.LUCK, 1, true);
+        itemMetaAdd.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        itemAdd.setItemMeta(itemMetaAdd);
+    }
+
+    public void updateVote(Player playerClicked, Gui gui, boolean changedVote, String vote) {
         DiscordWebhook.EmbedObject embedObject = plugin.getEmbedObject();
         if (changedVote) {
             embedObject.setTitle(playerClicked.getName() + " changed their vote to " + vote);
         } else {
             embedObject.setTitle(playerClicked.getName() + " voted " + vote);
         }
-        embedObject.setDescription("Title: " + plugin.getSqlSettingsCache().select("title").toString() + "\\n" +
-                "Description: " + plugin.getSqlSettingsCache().select("description").toString());
-        cacheData.update(vote, playerClicked.getUniqueId().toString());
-        item.addUnsafeEnchantment(Enchantment.LUCK, 1);
-        itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        item.setItemMeta(itemMeta);
-        gui.update();
+
+        String title = plugin.getSqlDatabase().querySingleResultString("SELECT setting FROM vote_data WHERE setting='title';");
+        String description = plugin.getSqlDatabase().querySingleResultString("SELECT setting FROM vote_data WHERE setting='description';");
+
+        embedObject.setDescription("Title: " + title + "\\n" +
+                "Description: " + description);
+
+        plugin.getSqlDatabase().execute(String.format("INSERT INTO votes (uuid, vote) VALUES ('%s', '%s');", playerClicked.getUniqueId(), vote));
         plugin.executeWebhook();
     }
 }
